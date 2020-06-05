@@ -4,12 +4,12 @@
 ## of the motif and outputs the one that best aligns with the match.
 import re, sys
 
-match = 'GKRIMA'
-match = 'KKSRRMCP'
+#match = 'GKRIMA'
+#match = 'KKSRRMCP'
 #match = 'IP'
-match = 'GKKRSTSTSTSTMPPA'
+#match = 'GKKRSTSTSTSTMPPA'
 #match = 'TINCQEPKLGSLVVRCS'
-motif = '^G[KR]{2}R.{0,2}(ST){3,7}[LM]P{1,3}A$'
+#motif = '^G[KR]{2}R.{0,2}(ST){3,7}[LM]P{1,3}A$'
 #motif = '([FVL].C)|(C.[FVL])'
 #motif = '([IL][VILY].[^P]A[^P].[VIL][^P].[^P][VLMT][^P][^P][VL][VIL])|(DD[IL][VILY].[^P]A[^P].[VL][^P].[^P][VLM][^P]P[VL][VIL])'
 #motif = '(([KR]{1,2})|([KR]{1,2}.[KR]{1,3})).{0,2}C.|[VIL].$'
