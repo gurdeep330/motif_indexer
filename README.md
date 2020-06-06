@@ -13,5 +13,5 @@ For a given pairt of Motif and its match (which you can easily find using *re* m
 4. Include the *re.search()/re.findall* from Python so that the function can take a sequence as input
 
 ### Notes:
-1. Motif_Indexer has been tested on ELM and 3DID motifs (05/06/2020) with Python3 (I can't guarantee other RegEx)
-2. A lowercase character in the pattern represents a ^(Caret) - eg: the pattern Al.P should imagined as A[^L].P
+1. Tested on **[ELM](http://elm.eu.org/)** and **[3DID](https://3did.irbbarcelona.org/)** motifs (05/Jun/2020) with Python3 (I can't guarantee other RegEx)
+2. A lowercase character in the pattern represents a ^(Caret) - eg: the pattern Ap.L should imagined as A[^P].L
