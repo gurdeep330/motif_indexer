@@ -2,24 +2,19 @@
 
 ## For a given pair of motif and its mathc, motif_indexer finds all the possible patterns
 ## of the motif and outputs the one that best aligns with the match.
+
+## Import built-in libraries
 import re, sys
 
-#match = 'GKRIMA'
-#match = 'KKSRRMCP'
-#match = 'IP'
-#match = 'GKKRSTSTSTSTMPPA'
-#match = 'TINCQEPKLGSLVVRCS'
-#motif = '^G[KR]{2}R.{0,2}(ST){3,7}[LM]P{1,3}A$'
-#motif = '([FVL].C)|(C.[FVL])'
-#motif = '([IL][VILY].[^P]A[^P].[VIL][^P].[^P][VLMT][^P][^P][VL][VIL])|(DD[IL][VILY].[^P]A[^P].[VL][^P].[^P][VLM][^P]P[VL][VIL])'
-#motif = '(([KR]{1,2})|([KR]{1,2}.[KR]{1,3})).{0,2}C.|[VIL].$'
-#motif = '([DEST]|^).{0,4}[LI].C.E.{1,4}[FLMIVAWPHY].{0,8}([DEST]|$)'
+## Header
+__author__ = "Gurdeep Singh"
+__license__ = "GPL"
+__email__ = "gurdeep330@gmail.com"
 
 ##### The script starts here #####
 ##################################
 
 ## A secondary function called by the primry function "make_sorts"
-##
 def var_len(pos, motif):
     arr = []
     while motif[pos] != '}':
@@ -87,6 +82,7 @@ def make_sorts(motif):
 
 ## Function to split the sorts into more
 ## than one array if there is a pipe/OR
+## It also removes '^' if it is a solo-sort
 def pipe(data):
     new_data = []
     row = []
@@ -94,7 +90,7 @@ def pipe(data):
         if value == '|':
             new_data.append(row)
             row = []
-        else:
+        elif value != '^':
             row.append(value)
     new_data.append(row)
     return new_data
@@ -122,6 +118,7 @@ def join_outcome(dic):
                 data[i] = ''.join(data[i])
         else:
             new_data = []
+            #print (i, dic[i], len(data))
             for val in dic[i]:
                 for row in data:
                     new_row = row
@@ -181,9 +178,25 @@ def generate_outcome(val):
                     #print (dic[i])
                     i += 1
                 elif val[pos] == '[':
-                    # Store the characterS in the list-ed form eg ['S', 'A']
-                    mem = list(val[pos+1:].split(']')[0])
-                    pos += len(mem)+1
+                    if val[pos+1] == '^':
+                        # Store the characterS in the list-ed form eg [^SA] = ['P', 'Q' ....]
+                        aa =  list(val[pos+2:].split(']')[0])
+                        pos += len(aa)+2
+                        mem = []
+                        '''
+                        for x in list("ACDEFGHIKLMNPQRSTVWY"):
+                            if x not in aa:
+                                mem.append(x)
+                        '''
+                        # Convert all [^..] AAs to lowercase
+                        # and then match them differently later
+                        mem = [char.lower() for char in aa]
+                        #print (mem)
+                        #sys.exit()
+                    else:
+                        # Store the characterS in the list-ed form eg ['S', 'A']
+                        mem = list(val[pos+1:].split(']')[0])
+                        pos += len(mem)+1
                     # Check and modify (dic) if there is a '{' just after the character
                     pos = check_len(i, pos, mem, val, dic)
                     i += 1
@@ -199,7 +212,9 @@ def generate_outcome(val):
                 pos += 1
                 #for num in range(len(dic)):
                 #    print (dic[num])
+                #print (pos, len(val))
                 #sys.exit()
+            #print ('here', len(dic))
             return(join_outcome(dic))
     else:
         return ['']
@@ -228,13 +243,14 @@ def process_a_sort(val):
 
 def main(motif, match):
     #print ('The given motif is', motif)
-    motif = re.sub("[^A-Z 0-9 \[ \] \. \{ \} \| \, \( \)]", '', motif)
-    #print ('The modified motif is', motif)``
+    motif = re.sub("[^A-Z 0-9 \[ \] \. \{ \} \| \, \( \) \^]", '', motif)
+    #print ('The modified motif is', motif)
     # Make sorts of the given motif
     data = make_sorts(motif)
     # To check and split the sorts (if there is a pipe/OR)
     # Each row will contain a collections of sorts
     # Each row together is an outcome
+    # Pipe also removes '^' if it is a solo-sort
     data = pipe(data)
     #print ('The list-ed motif is', data)
     #sys.exit()
@@ -248,15 +264,22 @@ def main(motif, match):
             # Process each sort
             dic[i] = process_a_sort(val)
             i+=1
+        #print ('fetch')
+        #sys.exit()
         outcomes += join_outcome(dic)
     #print (outcomes)
-
+    print ('#A lowercase character in the pattern means it is ^(Caret)')
+    print ('#Pattern', 'Match')
     for outcome in outcomes:
         if len(outcome) == len(match):
             flag = 1
             for i, j in zip(outcome, match):
                 if i != '.':
-                    if i != j:
+                    if i.islower() == True:
+                        if i.upper() == j:
+                            flag = 0
+                            break
+                    elif i != j:
                         flag = 0
                         break
             if flag == 1:
