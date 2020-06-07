@@ -5,6 +5,9 @@
 
 ## Import built-in libraries
 import re, sys
+from itertools import combinations_with_replacement
+from itertools import permutations
+from itertools import product
 
 ## Header
 __author__ = "Gurdeep Singh"
@@ -108,9 +111,25 @@ def solve_paran(pos, motif):
         pos += 1
     return pos, start, end
 
-
-def join_outcome(dic):
+def join_outcome(dic, match):
     data = []
+    if len(dic) > 0:
+        #print (dic)
+        #print (len(dic))
+        #x = [['ABCD', 'EFG'], ['xy'], ['12', '3']]
+        x = [dic[i] for i in range(len(dic))]
+        #print (x)
+        for case in product(*x):
+            #print (len(list(product(*x))))
+            var = ''.join(case)
+            var = list(var)
+            if len(var) <= len(list(match)):
+                #print (len(var), len(list(match)))
+                data.append(''.join(case))
+        #print (data)
+        #sys.exit()
+    #print (dic)
+    '''
     for i in range(len(dic)):
         if data == []:
             data = dic[i]
@@ -123,11 +142,20 @@ def join_outcome(dic):
                 for row in data:
                     new_row = row
                     new_row += ''.join(val)
-                    new_data.append(new_row)
+                    if len(new_row) <= len(match):
+                        new_data.append(new_row)
             data = new_data
+            #print (len(data))
     #print (data)
     #print (len(data))
+    '''
     return data
+
+def all_same(case):
+    if case.count(case[0]) == len(case):
+        return True
+    else:
+        return False
 
 # Check and add more possible outcomes if there is a '{'
 def check_len(i, pos, mem, val, dic):
@@ -138,10 +166,32 @@ def check_len(i, pos, mem, val, dic):
             #print (start, end, pos)
             n = len(dic)
             #row += arr
+    #if end-start>=8:
+    #    end = start+8
+        #return pos
     if start == -1 or end == -1:
         start = 1
         end = 1
     dic[i] = []
+    #print (mem, start, end)
+    for num in range(start, end+1):
+        #print (list(combinations(["hel", "lo", "bye"], 2)))
+        #dic[i] += ["".join(case) for case in combinations_with_replacement(mem, num)]
+        cases = ["".join(case) for case in combinations_with_replacement(mem, num)]
+        #sys.exit()
+        add = []
+        for case in cases:
+            if len(case) > 1 and all_same(case) == False:
+                for perm in permutations(case):
+                    #print (''.join(list(perm)))
+                    #if ''.join(list(perm)) not in dic[i] and ''.join(list(perm)) not in add:
+                    add.append(''.join(list(perm)))
+                    #print (dic[i])
+        dic[i] += cases + add
+        dic[i] = list(set(dic[i]))
+    #print (dic[i],'++')
+    #sys.exit()
+    '''
     for aa in mem:
         for num in range(start, end+1):
             j = 1
@@ -150,11 +200,13 @@ def check_len(i, pos, mem, val, dic):
                 row.append(aa)
                 j += 1
             dic[i].append(row)
-
+    '''
+    #print (pos)
+    #sys.exit()
     return pos
 
 ## Generates possible outcomes of a given sub-sort
-def generate_outcome(val):
+def generate_outcome(val, match):
     #print (len(val))
     if len(val) > 0:
         if val[0] == '(' and val[-1] == ')':
@@ -163,7 +215,8 @@ def generate_outcome(val):
             data =[]
             dic = {}
             i = 0
-            #print ('Mod', val)
+            #print ('Mod', val.split())
+            #sys.exit()
             pos = 0
             # To investigate the given sub-sort character by character
             # All the possible subsorts are stored in the variable dic
@@ -201,26 +254,37 @@ def generate_outcome(val):
                     pos = check_len(i, pos, mem, val, dic)
                     i += 1
                 elif val[pos] == '(':
-                    # Store the group of characterS together in the list-ed form eg ['SA']
-                    mem = [val[pos+1:].split(')')[0]]
-                    #print (mem)
-                    #sys.exit()
-                    pos += len(mem[0])+1
-                    # Check and modify (dic) if there is a '{' just after the character
-                    pos = check_len(i, pos, mem, val, dic)
-                    i += 1
+                    if ']' not in val[pos+1:].split(')')[0]:
+                        # Store the group of characterS together in the list-ed form eg ['SA']
+                        mem = [val[pos+1:].split(')')[0]]
+                        #print (mem)
+                        #sys.exit()
+                        pos += len(mem[0])+1
+                        # Check and modify (dic) if there is a '{' just after the character
+                        #print (val)
+                        #sys.exit()
+                        pos = check_len(i, pos, mem, val, dic)
+                        i += 1
+                    else:
+                        #print (val)
+                        val = val[:pos] + val[pos+1:].replace(')', '')
+                        #print (val)
+                        pos -= 1
                 pos += 1
                 #for num in range(len(dic)):
                 #    print (dic[num])
                 #print (pos, len(val))
-                #sys.exit()
+            #sys.exit()
             #print ('here', len(dic))
-            return(join_outcome(dic))
+            if len(val) > 0:
+                return(join_outcome(dic, match))
+            else:
+                return ['']
     else:
         return ['']
 
 ## Function to process a given sort
-def process_a_sort(val):
+def process_a_sort(val, match):
     #print (val)
     if val[0] == '(' and val[-1] == ')':
         val = val[1:-1]
@@ -233,12 +297,12 @@ def process_a_sort(val):
         #print (val,'---')
         data = []
         for subval in val:
-            #print (''.join(subval))
+            #print (val, ''.join(subval))
             x = ''.join(subval)
             #print (x.split())
-            data += generate_outcome(''.join(subval))
+            data += generate_outcome(''.join(subval), match)
             #print (data)
-        #sys.exit()
+            #sys.exit()
         return data
 
 def main(motif, match):
@@ -260,16 +324,20 @@ def main(motif, match):
         #print ('-----------')
         dic = {}
         i = 0
+        count = 0
         for val in row:
             # Process each sort
-            dic[i] = process_a_sort(val)
+            dic[i] = process_a_sort(val, match)
+            count += len(dic[i])
             i+=1
-        #print ('fetch')
+        #print (count)
         #sys.exit()
-        outcomes += join_outcome(dic)
+        #outcomes = join_outcome(dic)
+        outcomes += join_outcome(dic, match)
     #print (outcomes)
-    print ('#A lowercase character in the pattern means it is ^(Caret)')
-    print ('#Pattern', 'Match')
+    #print ('#A lowercase character in the pattern means it is ^(Caret)')
+    #print ('#Pattern', 'Match')
+    l = ''
     for outcome in outcomes:
         if len(outcome) == len(match):
             flag = 1
@@ -284,5 +352,7 @@ def main(motif, match):
                         break
             if flag == 1:
                 print (outcome, match)
+                l += outcome + '\t' + match + '\n'
+    return l
 
 #main(motif, match)
