@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ## For a given pair of motif and its mathc, motif_indexer finds all the possible patterns
 ## of the motif and outputs the one that best aligns with the match.
 
 ## Import built-in libraries
-import re, sys
+import re, sys, argparse
 from itertools import combinations_with_replacement
 from itertools import permutations
 from itertools import product
@@ -169,9 +169,12 @@ def check_len(i, pos, mem, val, dic):
     #if end-start>=8:
     #    end = start+8
         #return pos
+    #print ('mem is', mem, end-start, len(mem)*(end-start))
     if start == -1 or end == -1:
         start = 1
         end = 1
+    elif len(mem) > 3:
+        end = start + 5
     dic[i] = []
     #print (mem, start, end)
     for num in range(start, end+1):
@@ -337,7 +340,9 @@ def main(motif, match):
     #print (outcomes)
     #print ('#A lowercase character in the pattern means it is ^(Caret)')
     #print ('#Pattern', 'Match')
+    #l = '#Motif\tMatch\n'
     l = ''
+    data = []
     for outcome in outcomes:
         if len(outcome) == len(match):
             flag = 1
@@ -351,8 +356,79 @@ def main(motif, match):
                         flag = 0
                         break
             if flag == 1:
-                print (outcome, match)
-                l += outcome + '\t' + match + '\n'
-    return l
+                #print (outcome, match)
+                #l += outcome + '\t' + match + '\n'
+                data.append((outcome, match))
+    data, dic = verify(data, outcomes)
+    #for outcome, match in data:
+    #    if 'Sn....F' in outcome:
+    #        print (outcome, match)
+    #sys.exit()
+    if len(data) != 0:
+        for outcome, match in data:
+            l += outcome + '\t' + match + '\n'
+            #print (outcome, match)
+    #else:
+    #    l += 'The given pair of Motif and Match do not align'
+    return l, outcomes, dic
 
-#main(motif, match)
+def find_same_patterns(position, outcome, outcomes, dic):
+    dic[outcome][position] = []
+    for pattern in outcomes:
+        if len(pattern) == len(outcome):
+            if pattern[position].islower():
+                if pattern[:position]+pattern[position+1:] == outcome[:position]+outcome[position+1:]:
+                    #print (position, pattern, outcome)
+                    dic[outcome][position].append(pattern[position])
+    #print (dic[position])
+    #sys.exit()
+
+def verify(data, outcomes):
+    new_data = []
+    dic = {}
+    eliminated = []
+    for outcome, match in data:
+        if (any(char.islower() for char in outcome)):
+            #print ('Dealing with', outcome, match)
+            for position, char in enumerate(outcome):
+                if char.islower():
+                    if outcome not in dic:
+                        dic[outcome] = {}
+                    if position not in dic[outcome]:
+                        find_same_patterns(position, outcome, outcomes, dic)
+
+    #print (dic)
+    #print (outcomes)
+    for outcome, match in data:
+        flag = 1
+        if outcome in dic:
+            for position, char in enumerate(outcome):
+                if position in dic[outcome]:
+                    for char in dic[outcome][position]:
+                        if match[position].lower() == char:
+                            flag = 0
+                            break
+                if flag == 0:
+                    break
+        if flag == 1:
+            new_data.append((outcome, match))
+        #if outcome == 'RepSn....F':
+        #    print (outcome, match)
+        #    print (flag, position, char)
+
+    return new_data, dic
+
+## If running locally
+if __name__ == '__main__':
+    #print ('hello')
+    #print ('hello')
+    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='To exapnd a Motif and map its indexes to that of a given match',  epilog="contact: gurdeep330[YouKnowWhat]gmail[YouKnowWhat]com")
+    parser.add_argument('motif', help='Motif (eg: [NQ]{0,1}..[ILMV][ST][DEN][FY][FY].{2,3}[KR]{2,3}[^DE])')
+    parser.add_argument('match', help='Match (eg: PLISDFFAKRKRS)')
+    args = parser.parse_args()
+    motif = args.motif
+    match = args.match
+    l, outcomes, dic = main(motif, match)
+    print (l)
+    sys.exit()

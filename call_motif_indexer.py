@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import motif_indexer
+import re
 
 ## A few examples
 motif = '^G[KR]{2}R.{0,2}(ST){3,7}[^LM]P{1,3}A$'
 match = 'GKKRSTSTSTSTTPPA'
 
-motif = '(Y)[^EPILVFYW][^HDEW][PLIV][^DEW]'
-match = 'YAAVA'
+#motif = '(Y)[^EPILVFYW][^HDEW][PLIV][^DEW]'
+#match = 'YAAVA'
 
 motif = '[NQ]{0,1}..[ILMV][ST][DEN][FY][FY].{2,3}[KR]{2,3}[^DE]'
 match = 'PLISDFFAKRKRS'
@@ -27,8 +28,8 @@ match = 'PLISDFFAKRKRS'
 #motif = '([FVL].C)|(C.[FVL])'
 #match = 'CIV'
 
-#motif = '([IL][VILY].[^P]A[^P].[VIL][^P].[^P][VLMT][^P][^P][VL][VIL])|(DD[IL][VILY].[^P]A[^P].[VL][^P].[^P][VLM][^P]P[VL][VIL])'
-#match = 'LYIYAY.LA.ATAAVI'
+motif = '([IL][VILY].[^P]A[^P].[VIL][^P].[^P][VLMT][^P][^P][VL][VIL])|(DD[IL][VILY].[^P]A[^P].[VL][^P].[^P][VLM][^P]P[VL][VIL])'
+match = 'LYIYAYGLAGATAAVI'
 
 #motif = '.[^P]A[^P].[VIL][^P].[^P][VLMT][^P][^P][VL][VIL]'
 #match = 'AAAAAIAAATAAVI'
@@ -36,8 +37,8 @@ match = 'PLISDFFAKRKRS'
 #motif = '[LFVAIMW].{3,5}[DE][FY][IL][SAPGK][FL].{3,6}[DE]{3}'
 #match = 'LEDNQDFIAFSDSSEDE'
 
-#motif = '[DEST]{1,3}.{0,1}[VIL][DESTVILMA][VIL][VILM].[DEST]{0,3}'
-#match = 'EVILLDSD'
+motif = '[DEST]{1,4}.{0,1}[VIL][DESTVILMA][VIL][VILM].[DEST]{0,4}'
+match = 'EVILLDSD'
 
 #motif = '([VILA]..N.I[RK])|([VILA].PN.IG.{0,6}[RK])'
 #match = 'LNSNAIK'
@@ -48,4 +49,18 @@ match = 'PLISDFFAKRKRS'
 #motif = '(([^PEDGKN][FWYLIVM]).)'
 #match = 'ALY'
 
-motif_indexer.main(motif, match)
+#motif = 'P.I[^DF].[^P].'
+#match = 'PAIDMAI'
+
+motif = '[^DE]{0,2}[^DEPG]([ST])(([FWYLMV].)|([^PRIKGN]P)|([^PRIKGN].{2,4}[VILMFWYP]))'
+match = 'RVYSTGSNVF'
+
+motif = 'R[^DE]{0,2}[^DEPG]([ST])(([FWYLMV].)|([^PRIKGN]P)|([^PRIKGN].{2,4}[VILMFWYP]))'
+match = 'RVYSTGSNVF'
+
+#motif = '[DEST]{1,10}.{0,1}[VIL][DESTVILMA][VIL][VILM].[DEST]{0,5}'
+#match = 'SSSSDNIALLV'
+
+#print (re.search(motif, match))
+l, outcomes, dic = motif_indexer.main(motif, match)
+print (outcomes)
