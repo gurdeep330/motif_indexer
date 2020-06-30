@@ -62,5 +62,7 @@ match = 'RVYSTGSNVF'
 #match = 'SSSSDNIALLV'
 
 #print (re.search(motif, match))
+motif = 'P.{0,1}P.{0,2}P'
+match = 'PPTEP'
 l, outcomes, dic = motif_indexer.main(motif, match)
 print (outcomes)
